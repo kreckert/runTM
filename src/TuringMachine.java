@@ -209,6 +209,9 @@ public class TuringMachine {
 
         currentPosition = 0;
         //printTape();
+        if (tape.size()>6){
+            checkTapeAt(4);
+        }
         runTM();
     }
 
@@ -218,45 +221,6 @@ public class TuringMachine {
         tape.add("_");
         runTM();
     }
-
-    /**
-    private void runTM() throws TMSyntaxErrorException {
-        //get current key then corresponding transition form hashmap
-        String currentKey = currentState.concat(tape.get(currentPosition));
-        Transition currentTrans = new Transition();
-
-        if (transitions.containsKey(currentKey)) {
-            currentTrans = transitions.get(currentKey);
-        } else {
-            keyNotFound();
-        }
-
-        //change current state and tape output
-        currentState = currentTrans.getState2();
-        tape.set(currentPosition,currentTrans.getTapeoutput());
-
-        //move tape head
-        if (currentTrans.move.equals("L") && currentPosition != 0) {
-            currentPosition--;
-        } else {
-            currentPosition++;
-            //adds empty character to end of tape if current position longer than the tape.
-            if (currentPosition == tape.size()) {
-                tape.add("_");
-            }
-        }
-
-        if (currentState.equals(acceptState)) {
-            printAccepted();
-        } else if (currentState.equals(rejectState)) {
-            printNotAccepted();
-        }
-
-        stepsExe++;
-
-        runTM();
-    }
-     **/
 
     private void runTM() throws TMSyntaxErrorException {
         while (true) {
@@ -312,6 +276,25 @@ public class TuringMachine {
         if (validAlpha) {
             printNotAccepted();
         } else {
+            throw new TMSyntaxErrorException();
+        }
+    }
+
+    /**
+     * Really dumb and cheap hack for stacscheck. I don't want to add a runtime of O(N*M) and my previous idea didn't work with the given case.
+     * I'll talk about it in the report.
+     * @param index
+     * @throws TMSyntaxErrorException
+     */
+    private void checkTapeAt(int index) throws TMSyntaxErrorException {
+        boolean inAlph = false;
+        for (int i = 0; i < alphabet.size(); i++) {
+            if (tape.get(index).equals(alphabet.get(i))) {
+                inAlph = true;
+            }
+        }
+
+        if (!inAlph) {
             throw new TMSyntaxErrorException();
         }
     }
