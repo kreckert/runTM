@@ -7,10 +7,23 @@ public class Main {
         //System.out.println("Your first argument is: "+args[0]);
 
         try {
-            TuringMachine turingMachine = new TuringMachine(args[0]);
-            if (args.length > 1) {
+            TuringMachine turingMachine;
+
+            if (args[0].equals("-n")) {
+                turingMachine = new TuringMachine();
+                turingMachine.setNDTMFile(args[1]);
+
+                if (args.length == 3) {
+                    //turingMachine.loadTape(args[2]);
+                } else {
+                    turingMachine.runEmptyTape();
+                }
+
+            } else if (args.length > 1) {
+                turingMachine = new TuringMachine(args[0]);
                 turingMachine.loadTape(args[1]);
             } else {
+                turingMachine = new TuringMachine(args[0]);
                 turingMachine.runEmptyTape();
             }
         }

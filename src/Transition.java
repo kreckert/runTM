@@ -1,7 +1,11 @@
+import java.util.ArrayList;
+
 public class Transition {
     private String state2;
     private String tapeoutput;
     private String move;
+    private ArrayList<Transition> transitions;
+    private boolean multipleTransitions;
 
     public Transition() {
     }
@@ -10,6 +14,8 @@ public class Transition {
         this.state2 = state2;
         this.tapeoutput = tapeoutput;
         this.move = move;
+        transitions = new ArrayList<>();
+        multipleTransitions = false;
     }
 
     public String getState2() {
@@ -34,5 +40,18 @@ public class Transition {
 
     public void setMove(String move) {
         this.move = move;
+    }
+
+    public void addNDTransition(Transition ndTransition) {
+        multipleTransitions = true;
+        transitions.add(ndTransition);
+    }
+
+    public ArrayList<Transition> getTransitions() {
+        return transitions;
+    }
+
+    public boolean hasMultipleTransitions() {
+        return multipleTransitions;
     }
 }
