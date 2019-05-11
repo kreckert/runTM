@@ -7,8 +7,8 @@ import java.util.Scanner;
 public class TuringMachine {
 
     private String TMFile;
-    private ArrayList<String> states = new ArrayList<>();
-    private ArrayList<String> alphabet = new ArrayList<>();
+    private HashMap<String, Integer> states = new HashMap<>();
+    private HashMap<String, Integer> alphabet = new HashMap<>();
     private String rejectState;
     private String acceptState;
     private HashMap<String, Transition> transitions = new HashMap<>();
@@ -99,26 +99,26 @@ public class TuringMachine {
         //populates states and finds accept & reject state
         if (state.length == 2 && state[1].equals("-")) {
             rejectState = state[0];
-            states.add(state[0]);
+            states.put(state[0], 1);
         } else if (state.length == 2 && state[1].equals("+")) {
             acceptState = state[0];
-            states.add(state[0]);
+            states.put(state[0], 1);
         } else {
-            states.add(state[0]);
+            states.put(state[0], 1);
         }
     }
 
     private void addAlpha(String line) throws TMSyntaxErrorException {
-        String[] alphabet = line.split("\\s+");
+        String[] alphArray = line.split("\\s+");
         int alphaLength = 0;
 
-        if (!alphabet[0].equals("alphabet")) {
+        if (!alphArray[0].equals("alphabet")) {
             throw new TMSyntaxErrorException();
         }
 
         //makes sure length of alphabet is a numerical value
         try {
-            alphaLength = Integer.parseInt(alphabet[1]);
+            alphaLength = Integer.parseInt(alphArray[1]);
         } catch (NumberFormatException e) {
             System.out.println("input error");
             System.exit(2);
@@ -127,30 +127,27 @@ public class TuringMachine {
         //Verifies the length of the alphabet
         if (alphaLength < 1) {
             throw new TMSyntaxErrorException();
-        } else if ((alphaLength + 2) != alphabet.length) {
+        } else if ((alphaLength + 2) != alphArray.length) {
             throw new TMSyntaxErrorException();
         }
 
         //Populate alphabet alphabet starts at [2] in array
         for (int i = 0; i < alphaLength; i++) {
-            this.alphabet.add(alphabet[i + 2]);
+            alphabet.put(alphArray[i+2], 1);
         }
 
-        this.alphabet.add("_");
+        alphabet.put("_", 1);
     }
 
     private void addTrans(String line) throws TMSyntaxErrorException {
         String[] tran = line.split("\\s+");
 
-
-        /**
          //Verifies that state names and chars exist in alphabet
          if (statesContains(tran[0]) && statesContains(tran[2]) && alphContains(tran[1]) && alphContains(tran[3])) {
 
          } else {
-         throw new TMSyntaxErrorException();
+            throw new TMSyntaxErrorException();
          }
-         **/
 
         //verifies last char is left or right
         if (tran[4].equals("L") || tran[4].equals("R")) {
@@ -175,19 +172,15 @@ public class TuringMachine {
     }
 
     private boolean alphContains(String x) {
-        for (int i = 0; i < alphabet.size(); i++) {
-            if (alphabet.get(i).equals(x)) {
-                return true;
-            }
+        if (alphabet.containsKey(x)) {
+            return true;
         }
         return false;
     }
 
     private boolean statesContains(String x) {
-        for (int i = 0; i < states.size(); i++) {
-            if (states.get(i).equals(x)) {
-                return true;
-            }
+        if (states.containsKey(x)){
+            return true;
         }
         return false;
     }
@@ -217,12 +210,10 @@ public class TuringMachine {
         }
 
         currentPosition = 0;
-        //printTape();
         if (tape.size() > 6) {
             checkTapeAt(4);
         }
         runTM();
-        //testTransitions();
     }
 
     public void runEmptyTape() throws Exception {
@@ -230,7 +221,6 @@ public class TuringMachine {
         currentPosition = 0;
         tape.add("_");
         runTM();
-        //testTransitions();
     }
 
     private void runTM() throws TMSyntaxErrorException {
@@ -282,15 +272,15 @@ public class TuringMachine {
 
         //check if state and alphabet are valid
         boolean validAlpha = false;
-        for (int i = 0; i < alphabet.size(); i++) {
-            if (tape.get(currentPosition).equals(alphabet.get(i))) {
-                validAlpha = true;
-            }
+
+        if (alphabet.containsKey(tape.get(currentPosition))) {
+            validAlpha = true;
         }
 
         if (validAlpha) {
             printNotAccepted();
         } else {
+            System.out.println("this happened");
             throw new TMSyntaxErrorException();
         }
     }
@@ -304,10 +294,8 @@ public class TuringMachine {
      */
     private void checkTapeAt(int index) throws TMSyntaxErrorException {
         boolean inAlph = false;
-        for (int i = 0; i < alphabet.size(); i++) {
-            if (tape.get(index).equals(alphabet.get(i))) {
-                inAlph = true;
-            }
+        if (alphabet.containsKey(tape.get(index))) {
+            inAlph = true;
         }
 
         if (!inAlph) {

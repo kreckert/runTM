@@ -8,7 +8,7 @@ public class Main {
 
         try {
             TuringMachine turingMachine = new TuringMachine(args[0]);
-            if (args.length == 2) {
+            if (args.length > 1) {
                 turingMachine.loadTape(args[1]);
             } else {
                 turingMachine.runEmptyTape();
