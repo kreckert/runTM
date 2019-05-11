@@ -1,7 +1,7 @@
 public class Transition {
-    String state2;
-    String tapeoutput;
-    String move;
+    private String state2;
+    private String tapeoutput;
+    private String move;
 
     public Transition() {
     }

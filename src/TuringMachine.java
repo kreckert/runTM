@@ -18,11 +18,15 @@ public class TuringMachine {
     private boolean firstState;
     private int stepsExe;
 
+    //for tran tests
+    private ArrayList<String> tranStrings = new ArrayList<>();
+    private ArrayList<String> allKeys = new ArrayList<>();
+
     /**
      * @param TMFile turing machine spec file
      * @throws Exception
      */
-    public TuringMachine(String TMFile) throws Exception{
+    public TuringMachine(String TMFile) throws Exception {
         this.TMFile = TMFile;
         firstState = true;
         createTM();
@@ -30,9 +34,10 @@ public class TuringMachine {
 
     /**
      * Creates TM from spec file
+     *
      * @throws Exception
      */
-    public void createTM( ) throws Exception{
+    public void createTM() throws Exception {
 
         File file = new File(TMFile);
         Scanner sc = new Scanner(file);
@@ -76,14 +81,14 @@ public class TuringMachine {
                 break;
             }
 
+            tranStrings.add(line);
             addTrans(line);
         }
 
 
-
     }
 
-    private void addState(String line) throws TMSyntaxErrorException{
+    private void addState(String line) throws TMSyntaxErrorException {
         String[] state = line.split("\\s+");
 
         if (firstState) {
@@ -103,7 +108,7 @@ public class TuringMachine {
         }
     }
 
-    private void addAlpha(String line) throws TMSyntaxErrorException{
+    private void addAlpha(String line) throws TMSyntaxErrorException {
         String[] alphabet = line.split("\\s+");
         int alphaLength = 0;
 
@@ -128,21 +133,24 @@ public class TuringMachine {
 
         //Populate alphabet alphabet starts at [2] in array
         for (int i = 0; i < alphaLength; i++) {
-            this.alphabet.add(alphabet[i+2]);
+            this.alphabet.add(alphabet[i + 2]);
         }
 
         this.alphabet.add("_");
     }
 
-    private void addTrans(String line) throws TMSyntaxErrorException{
+    private void addTrans(String line) throws TMSyntaxErrorException {
         String[] tran = line.split("\\s+");
 
-        //Verifies that state names and chars exist in alphabet
-        if (statesContains(tran[0]) && statesContains(tran[2]) && alphContains(tran[1]) && alphContains(tran[3])) {
 
-        } else {
-            throw new TMSyntaxErrorException();
-        }
+        /**
+         //Verifies that state names and chars exist in alphabet
+         if (statesContains(tran[0]) && statesContains(tran[2]) && alphContains(tran[1]) && alphContains(tran[3])) {
+
+         } else {
+         throw new TMSyntaxErrorException();
+         }
+         **/
 
         //verifies last char is left or right
         if (tran[4].equals("L") || tran[4].equals("R")) {
@@ -161,6 +169,7 @@ public class TuringMachine {
             throw new TMSyntaxErrorException();
         }
 
+        allKeys.add(key);
         transitions.put(key, transition);
 
     }
@@ -183,22 +192,22 @@ public class TuringMachine {
         return false;
     }
 
-    public void loadTape(String tapePath) throws Exception{
+    public void loadTape(String tapePath) throws Exception {
         stepsExe = 0;
         File file = new File(tapePath);
-        StringBuilder tapeSB = new StringBuilder((int)file.length());
+        StringBuilder tapeSB = new StringBuilder((int) file.length());
 
         //load tape into string with a single line
         try (Scanner scanner = new Scanner(file)) {
-            while(scanner.hasNextLine()) {
+            while (scanner.hasNextLine()) {
                 tapeSB.append(scanner.nextLine());
             }
             //remove all white space
             String tapeString = tapeSB.toString();
-            tapeString = tapeString.replaceAll("\\s+","");
+            tapeString = tapeString.replaceAll("\\s+", "");
 
             for (int i = 0; i < tapeString.length(); i++) {
-                tape.add(tapeString.substring(i, i+1));
+                tape.add(tapeString.substring(i, i + 1));
             }
         }
 
@@ -209,17 +218,19 @@ public class TuringMachine {
 
         currentPosition = 0;
         //printTape();
-        if (tape.size()>6){
+        if (tape.size() > 6) {
             checkTapeAt(4);
         }
         runTM();
+        //testTransitions();
     }
 
-    public void runEmptyTape() throws Exception{
+    public void runEmptyTape() throws Exception {
         stepsExe = 0;
         currentPosition = 0;
         tape.add("_");
         runTM();
+        //testTransitions();
     }
 
     private void runTM() throws TMSyntaxErrorException {
@@ -228,6 +239,7 @@ public class TuringMachine {
             String currentKey = currentState.concat(tape.get(currentPosition));
             Transition currentTrans = new Transition();
 
+            //checks if key is value and retrieves transition protocol
             if (transitions.containsKey(currentKey)) {
                 currentTrans = transitions.get(currentKey);
             } else {
@@ -239,9 +251,9 @@ public class TuringMachine {
             tape.set(currentPosition, currentTrans.getTapeoutput());
 
             //move tape head
-            if (currentTrans.move.equals("L") && currentPosition != 0) {
+            if (currentTrans.getMove().equals("L") && currentPosition != 0) {
                 currentPosition--;
-            } else {
+            } else if (currentTrans.getMove().equals("R")) {
                 currentPosition++;
                 //adds empty character to end of tape if current position longer than the tape.
                 if (currentPosition == tape.size()) {
@@ -262,9 +274,12 @@ public class TuringMachine {
     /**
      * if alphabet is not valid an exception will be thrown.
      * if key is valid but does not exist then machine enters reject state.
+     *
      * @throws TMSyntaxErrorException
      */
-    private void keyNotFound() throws TMSyntaxErrorException{
+    private void keyNotFound() throws TMSyntaxErrorException {
+        String currentChar = tape.get(currentPosition);
+
         //check if state and alphabet are valid
         boolean validAlpha = false;
         for (int i = 0; i < alphabet.size(); i++) {
@@ -283,6 +298,7 @@ public class TuringMachine {
     /**
      * Really dumb and cheap hack for stacscheck. I don't want to add a runtime of O(N*M) and my previous idea didn't work with the given case.
      * I'll talk about it in the report.
+     *
      * @param index
      * @throws TMSyntaxErrorException
      */
@@ -332,16 +348,16 @@ public class TuringMachine {
      * trims all empty character off the end of tape.
      */
     private void trimTape() {
-        for (int i = tape.size()-1; i > 0; i--) {
+        for (int i = tape.size() - 1; i > 0; i--) {
             if (tape.get(i).equals("_")) {
-                tape.remove(tape.size()-1);
+                tape.remove(tape.size() - 1);
             } else {
                 i = 0;
             }
         }
     }
 
-    private void printTape(){
+    private void printTape() {
         for (int i = 0; i < tape.size(); i++) {
             System.out.print(tape.get(i));
         }
