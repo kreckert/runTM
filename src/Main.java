@@ -7,24 +7,28 @@ public class Main {
         //System.out.println("Your first argument is: "+args[0]);
 
         try {
-            TuringMachine turingMachine;
+            TuringMachine turingMachine = new TuringMachine();
 
+            //check if it is ND
             if (args[0].equals("-n")) {
-                turingMachine = new TuringMachine();
+                turingMachine.setNonDeter(true);
                 turingMachine.setNDTMFile(args[1]);
 
                 if (args.length == 3) {
-                    //turingMachine.loadTape(args[2]);
+                    turingMachine.loadNDTape(args[2]);
                 } else {
                     turingMachine.runEmptyTape();
                 }
 
-            } else if (args.length > 1) {
-                turingMachine = new TuringMachine(args[0]);
-                turingMachine.loadTape(args[1]);
             } else {
-                turingMachine = new TuringMachine(args[0]);
-                turingMachine.runEmptyTape();
+                turingMachine.setNonDeter(false);
+                turingMachine.setNDTMFile(args[0]);
+
+                if (args.length > 1) {
+                    turingMachine.loadNDTape(args[1]);
+                } else {
+                    turingMachine.runEmptyTape();
+                }
             }
         }
         catch (TMSyntaxErrorException e) {
